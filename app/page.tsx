@@ -1,5 +1,6 @@
 "use client";
 
+import Header from '@/src/components/Header';
 import dynamic from 'next/dynamic';
 
 const Map = dynamic(() => import('@/src/components/Map'), { 
@@ -9,8 +10,8 @@ const Map = dynamic(() => import('@/src/components/Map'), {
 
 export default function Home() {
   return (
-    <main style={{ padding: "20px" }}>
-      <h1>Pontos de Doação</h1>
+    <main style={{ height: "100vh" }}>
+      <Header />
       <Map />
     </main>
   );

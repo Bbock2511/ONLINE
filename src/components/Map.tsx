@@ -4,10 +4,18 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Corrige o problema dos ícones padrão no Next.js/Webpack
-const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+const redIcon = L.divIcon({
+  className: "custom-google-pin",
+  html: `
+    <svg width="20" height="32" viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.3));">
+      <path d="M15 0C6.71573 0 0 6.71573 0 15C0 26.25 15 42 15 42C15 42 30 26.25 30 15C30 6.71573 23.2843 0 15 0Z" fill="#EA4335"/>
+      <circle cx="15" cy="15" r="5.5" fill="white"/>
+    </svg>
+  `,
+  iconSize: [20, 32],
+  iconAnchor: [10, 32],
+  popupAnchor: [0, -40]
+});
 
 export default function Map() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -23,19 +31,9 @@ export default function Map() {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    const DefaultIcon = L.icon({
-      iconRetinaUrl,
-      iconUrl,
-      shadowUrl,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-    });
-    L.Marker.prototype.options.icon = DefaultIcon;
-
-    L.marker([-29.71, -53.71])
+    L.marker([-29.71, -53.71], { icon: redIcon })
       .addTo(map)
       .bindPopup("Ponto de Doação Exemplo")
-      .openPopup();
 
     return () => {
       map.remove();
@@ -46,7 +44,7 @@ export default function Map() {
   return (
     <div 
       ref={mapContainerRef} 
-      style={{ height: "500px", width: "100%", borderRadius: "8px" }} 
+      style={{ height: "90%", width: "100%" }} 
     />
   );
 }
