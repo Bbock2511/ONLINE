@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 const headerStyle: React.CSSProperties = {
@@ -31,9 +32,11 @@ export default function Header() {
     <header style={headerStyle}>
       <div style={titleStyle}>ONLINE</div>
       <div>
-        <button style={buttonStyle} type="button">
-          Cadastrar comércio recebidor
-        </button>
+        <Link href="/cadastrar-comercio" passHref>
+          <button style={buttonStyle} type="button">
+            Cadastrar comércio recebidor
+          </button>
+        </Link>
       </div>
     </header>
   );
