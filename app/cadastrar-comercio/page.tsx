@@ -2,13 +2,20 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { createClient } from '@/src/utils/supabase/client';
+import { PontosDoacaoEnvio } from '@/src/utils/types/pontosDoacaoEnvio';
+import { useRouter } from 'next/navigation';
 
 export default function CadastrarComercioPage() {
+  const router = useRouter();
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
   const [contato, setContato] = useState('');
   const [tiposDoacao, setTiposDoacao] = useState<string[]>([]);
   const [erroDoacao, setErroDoacao] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
+  const supabase = createClient();
 
   const opcoesDoacao = [
     'Roupas e Cobertores', 
@@ -53,50 +60,86 @@ export default function CadastrarComercioPage() {
 
     // 2. Prepara o objeto final para salvar no Firestore
     const novoPontoColeta = {
-        nome,
-        endereco,
-        tiposDoacao,
-        lat: coordenadas.lat,
-        lng: coordenadas.lng,
-        criadoEm: new Date()
+      nome_empresa: nome,
+      endereco,
+      contato,
+      tipos_doacao: tiposDoacao,
+      latitude: coordenadas.lat,
+      longitude: coordenadas.lng,
     };
 
     console.log("Pronto para o Supabase:", novoPontoColeta);
-    // Aqui entraria o addDoc(collection(db, "pontos"), novoPontoColeta);
+    const sucesso = await sendData(novoPontoColeta);
+  
+    if (sucesso) {
+      alert("Ponto de coleta cadastrado com sucesso!");
+      
+      // Limpa o formulário após envio bem-sucedido
+      setNome('');
+      setEndereco('');
+      setContato('');
+      setTiposDoacao([]);
+      
+      router.replace('/'); 
+    } else {
+      alert("Ocorreu um erro ao salvar os dados. Tente novamente.");
+    }
   };
 
-    async function buscarCoordenadas(endereco: string) {
-        // Codifica o endereço para formato de URL (substitui espaços por %20, etc.)
-        const query = encodeURIComponent(endereco);
-        
-        // Filtrando a busca para o Brasil para ser mais preciso
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}&countrycodes=br&limit=1`;
+  const sendData = async (data: PontosDoacaoEnvio): Promise<boolean> => {
+    setEnviando(true);
+    
+    try {
+      const { error } = await supabase
+        .from('pontos_doacao')
+        .insert([data]); // O Supabase espera um array de objetos no .insert()
 
-        try {
-            const response = await fetch(url, {
-            headers: {
-                // O Nominatim exige um User-Agent identificável para evitar abusos
-                'User-Agent': 'OnlineAppUFSM (online-app@gmail.com)'
-            }
-            });
-            
-            const dados = await response.json();
+      if (error) {
+        console.error("Erro retornado pelo Supabase:", error);
+        return false;
+      }
 
-            if (dados && dados.length > 0) {
-            const lat = parseFloat(dados[0].lat);
-            const lng = parseFloat(dados[0].lon);
-            
-            console.log(`Sucesso! Lat: ${lat}, Lng: ${lng}`);
-            return { lat, lng };
-            } else {
-            console.warn("Nenhum resultado encontrado para este endereço.");
-            return null;
-            }
-        } catch (error) {
-            console.error("Erro na geocodificação:", error);
-            return null;
-        }
+      return true;
+    } catch (error) {
+      console.error("Erro de rede/desconhecido ao enviar dados:", error);
+      return false;
+    } finally {
+      setEnviando(false);
     }
+  };
+
+  const buscarCoordenadas = async (endereco: string) => {
+      // Codifica o endereço para formato de URL (substitui espaços por %20, etc.)
+      const query = encodeURIComponent(endereco);
+      
+      // Filtrando a busca para o Brasil para ser mais preciso
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}&countrycodes=br&limit=1`;
+
+      try {
+          const response = await fetch(url, {
+          headers: {
+              // O Nominatim exige um User-Agent identificável para evitar abusos
+              'User-Agent': 'OnlineAppUFSM (online-app@gmail.com)'
+          }
+          });
+          
+          const dados = await response.json();
+
+          if (dados && dados.length > 0) {
+          const lat = parseFloat(dados[0].lat);
+          const lng = parseFloat(dados[0].lon);
+          
+          console.log(`Sucesso! Lat: ${lat}, Lng: ${lng}`);
+          return { lat, lng };
+          } else {
+          console.warn("Nenhum resultado encontrado para este endereço.");
+          return null;
+          }
+      } catch (error) {
+          console.error("Erro na geocodificação:", error);
+          return null;
+      }
+  }
 
     const formatarTelefone = (valor: string) => {
         // 1. Remove tudo o que não for número
@@ -272,6 +315,7 @@ export default function CadastrarComercioPage() {
             type="submit" 
             style={{ 
               backgroundColor: '#CC2949', 
+              opacity: enviando ? 0.7 : 1,
               color: '#fff', 
               border: 'none', 
               padding: '14px', 
@@ -287,7 +331,7 @@ export default function CadastrarComercioPage() {
             onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
           >
-            CONFIRMAR CADASTRO
+            {enviando ? "SALVANDO..." : "CONFIRMAR CADASTRO"}
           </button>
 
         </form>
