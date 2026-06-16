@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
@@ -27,10 +28,20 @@ const buttonStyle: React.CSSProperties = {
   fontSize: '14px',
 };
 
+import logo from '../assets/online-logo.png';
+
 export default function Header() {
   return (
     <header style={headerStyle}>
-      <div style={titleStyle}>ONLINE</div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Image
+          src={logo}
+          alt="Logo ONLINE"
+          width={60}     
+          style={{ marginRight: 12, borderRadius: 6 }}
+        />
+        <div style={titleStyle}>ONLINE</div>
+      </div>
       <div>
         <Link href="/cadastrar-comercio" passHref>
           <button style={buttonStyle} type="button">
