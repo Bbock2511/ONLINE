@@ -45,7 +45,7 @@ export default function Header() {
       <div>
         <Link href="/cadastrar-comercio" passHref>
           <button style={buttonStyle} type="button">
-            Cadastrar comércio recebidor
+            Cadastrar ponto de coleta
           </button>
         </Link>
       </div>
