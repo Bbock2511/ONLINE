@@ -33,7 +33,8 @@ export default function CadastrarComercioPage() {
     'Água Potável', 
     'Produtos de Limpeza', 
     'Higiene Pessoal', 
-    'Ração para Animais'
+    'Ração para Animais',
+    'Móveis'
   ];
 
   // Exige "Texto, Texto, Texto" (Rua, Número, Bairro)
